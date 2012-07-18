@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Emacs Manager
 Comment=Emacs Manager daemon
+Version=@VERSION@
 Icon=emacs
 Exec=emacs-manager
 Terminal=false

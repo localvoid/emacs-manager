@@ -61,5 +61,12 @@ def build(bld):
         target = 'com.localvoid.EmacsManager.service',
         BINDIR=bld.env['BINDIR'])
 
+    bld(features = 'subst',
+        source = 'data/emacs-manager.desktop.in',
+        target = 'emacs-manager.desktop',
+        VERSION=VERSION)
+
     bld.install_files(os.path.join(bld.env['PREFIX'], 'share', 'dbus-1', 'services'),
                       'com.localvoid.EmacsManager.service')
+    bld.install_files(os.path.join(bld.env['PREFIX'], 'share', 'applications'),
+                      'emacs-manager.desktop')
