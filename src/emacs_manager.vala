@@ -19,10 +19,9 @@ public class EmacsManager : Object {
   static const string OBJECT_PATH = "/com/localvoid/EmacsManager";
 
   [DBus (visible = false)]
-  public weak DBusConnection dbus_connection { private get; construct; }
-  [DBus (visible = false)]
   public string sockets_path { private get; construct; }
 
+  private DBusConnection? dbus_connection;
   private DirectoryMonitor? sockets_monitor = null;
 
   private LinkedList<Task>? tasks = null;
@@ -31,8 +30,8 @@ public class EmacsManager : Object {
   private uint64 last_server_id = 0;
   private uint64 last_task_id = 0;
 
-  public EmacsManager(DBusConnection c, string sockets_path) {
-    Object(dbus_connection: c, sockets_path: sockets_path);
+  public EmacsManager(string sockets_path) {
+    Object(sockets_path: sockets_path);
   }
 
   construct {
@@ -40,6 +39,7 @@ public class EmacsManager : Object {
     this.servers = new HashMap<string, Server>();
 
     try {
+      this.dbus_connection = Bus.get_sync(BusType.SESSION);
       this.dbus_connection.register_object(OBJECT_PATH, this);
 
       init_monitors();

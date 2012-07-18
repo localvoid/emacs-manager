@@ -1,9 +1,11 @@
 using GLib;
 
 public class App : Application {
-  private SessionManager.ClientService? sm_client = null;
+  private SessionManager.SessionManager? session_manager = null;
+  private SessionManager.ClientPrivate? session_client = null;
+  private ObjectPath? session_client_id = null;
+
   private EmacsManager? emacs_manager = null;
-  private DBusConnection? dbus_connection = null;
 
   private string sockets_path = "/tmp/emacs" + ((uint32)Posix.getuid()).to_string();
 
@@ -11,6 +13,7 @@ public class App : Application {
     application_id = "com.localvoid.EmacsManager";
     flags = ApplicationFlags.IS_SERVICE;
     Log.set_handler(null, LogLevelFlags.LEVEL_MASK, log_handler);
+    this.startup.connect(this.on_startup);
   }
 
   private static void log_handler(string? domain, LogLevelFlags level, string message) {
@@ -21,51 +24,76 @@ public class App : Application {
     Log.default_handler(domain, level, message);
   }
 
-  protected override void startup() {
-    var main_loop = new MainLoop();
+  private void register_session() {
+    try {
+      this.session_manager = Bus.get_proxy_sync(BusType.SESSION,
+                                                SessionManager.DBUS_NAME,
+                                                SessionManager.DBUS_PATH);
 
-    register_session_client_async();
-    acquire_bus_async();
+      try {
+        this.session_manager.register_client(this.application_id,
+                                             "emacs-manager",
+                                             out this.session_client_id);
 
-    Notify.init("Emacs Manager");
-
-    main_loop.run();
+        try {
+          this.session_client = Bus.get_proxy_sync(BusType.SESSION,
+                                                   SessionManager.DBUS_NAME,
+                                                   this.session_client_id);
+        } catch (IOError e) {
+          critical("Could not get client: %s", e.message);
+        }
+        this.session_client.query_end_session.connect(on_query_end_session);
+        this.session_client.end_session.connect(on_end_session);
+        this.session_client.stop.connect(on_stop);
+      } catch (IOError e) {
+        critical("Could not register client: %s", e.message);
+      }
+    } catch (IOError e) {
+      critical(e.message);
+    }
   }
 
-  private async void acquire_bus_async() {
-    Bus.own_name(BusType.SESSION,
-                 "com.localvoid.EmacsManager",
-                 BusNameOwnerFlags.NONE,
-                 (c) => {
-                   message("Bus name acquired");
-                   this.dbus_connection = c;
-                   this.emacs_manager = new EmacsManager(c, this.sockets_path);
-                 },
-                 null,
-                 null);
-
+  private void on_query_end_session() {
+    debug("Query end session");
+    send_end_session_response(true);
   }
 
-  private async void register_session_client_async() {
-    if (this.sm_client != null)
-      return;
+  private void on_end_session() {
+    debug("End session");
+    send_end_session_response(true);
+    release();
+  }
 
-    this.sm_client = new SessionManager.ClientService(this.application_id);
+  private void on_stop() {
+    debug("Stop");
 
     try {
-      this.sm_client.register();
-    } catch(SessionManager.ConnectionError e) {
+      this.session_manager.unregister_client(this.session_client_id);
+    } catch (IOError e) {
       critical(e.message);
-      return_if_reached();
     }
+  }
 
-    if (this.sm_client != null) {
-      // The session manager may ask us to quit the service, and so we do.
-      this.sm_client.stop_service.connect(() => {
-          message ("Exiting...");
-          this.quit_mainloop();
-        });
+  private void send_end_session_response(bool is_okay, string reason = "") {
+    try {
+      debug("Sending is_okay = %s to session manager", is_okay.to_string());
+      this.session_client.end_session_response(is_okay, reason);
+    } catch (IOError e) {
+      warning("Couldn't reply to session manager: %s", e.message);
     }
+  }
+
+  private void on_startup() {
+    if (!get_is_remote()) {
+      register_session();
+      Notify.init("Emacs Manager");
+
+      this.emacs_manager = new EmacsManager(this.sockets_path);
+      hold();
+    }
+  }
+
+  private void on_shutdown() {
   }
 
   public static int main(string[] args) {
