@@ -60,6 +60,8 @@ public class App : Application {
 
   private void on_end_session() {
     debug("End session");
+    this.emacs_manager.kill_all_servers();
+
     send_end_session_response(true);
     release();
   }
@@ -91,9 +93,6 @@ public class App : Application {
       this.emacs_manager = new EmacsManager(this.sockets_path);
       hold();
     }
-  }
-
-  private void on_shutdown() {
   }
 
   public static int main(string[] args) {

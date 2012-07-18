@@ -144,6 +144,13 @@ public class EmacsManager : Object {
     return 1;
   }
 
+  [DBus (visible = false)]
+  public void kill_all_servers() {
+    foreach (var s in this.servers.values) {
+      s.kill();
+    }
+  }
+
   private void on_task_finished(Task task) {
     debug("Task finished");
     this.tasks.remove(task);
