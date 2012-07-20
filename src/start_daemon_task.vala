@@ -36,7 +36,7 @@ public class StartDaemonTask : Task {
         argv = {"emacs", "--daemon=" + this.name, null};
       }
 
-      Process.spawn_async_with_pipes(null,
+      Process.spawn_async_with_pipes(Environment.get_home_dir(),
                                      argv,
                                      null,
                                      SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
