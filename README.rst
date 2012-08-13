@@ -9,9 +9,7 @@ Packages
 ^^^^^^^^
 
 Fedora 64bit - https://github.com/downloads/localvoid/emacs-manager/emacs-manager-0.1.0-1.x86_64.rpm
-Fedora 32bit - 
-Debian 64bit - 
-Debian 32bit - 
+Fedora 32bit - https://github.com/downloads/localvoid/emacs-manager/emacs-manager-0.1.0-1.i686.rpm
 
 Compile from sources
 ^^^^^^^^^^^^^^^^^^^^
