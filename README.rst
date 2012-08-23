@@ -8,8 +8,8 @@ Installation
 Packages
 ^^^^^^^^
 
-- Fedora 64bit - https://github.com/downloads/localvoid/emacs-manager/emacs-manager-0.1.0-1.x86_64.rpm
-- Fedora 32bit - https://github.com/downloads/localvoid/emacs-manager/emacs-manager-0.1.0-1.i686.rpm
+- Fedora 64bit - https://github.com/downloads/localvoid/emacs-manager/emacs-manager-0.1.1-1.x86_64.rpm
+- Fedora 32bit - https://github.com/downloads/localvoid/emacs-manager/emacs-manager-0.1.1-1.i686.rpm
 
 Compile from sources
 ^^^^^^^^^^^^^^^^^^^^
