@@ -30,8 +30,8 @@ public class StartDaemonTask : Task {
 
       string[] argv;
       if (venv_file.query_exists(null)) {
-        argv = {"bash", venv_path, "-c",
-                "emacs", "--daemon=" + this.name, null};
+        argv = {"bash", "-c",
+                "source " + venv_path + " && emacs --daemon=" + this.name, null};
       } else {
         argv = {"emacs", "--daemon=" + this.name, null};
       }
