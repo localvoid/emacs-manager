@@ -2,6 +2,9 @@
  Emacs Manager
 ===============
 
+Latest versions of Gnome Shell extension doesn't require installation of this server. This project is
+now obsolete.
+
 Installation
 ------------
 
